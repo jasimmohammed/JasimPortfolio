@@ -10,6 +10,11 @@ const revealEls = [...document.querySelectorAll(".reveal")];
 const steps = [...document.querySelectorAll(".step")];
 const rail = document.querySelector(".tl-fill");
 const stepList = document.querySelector(".steps");
+const flows = [...document.querySelectorAll(".flow")].map((list) => ({
+  list,
+  fill: list.querySelector(".flow-fill"),
+  items: [...list.querySelectorAll(".flow-step")],
+}));
 
 window.addEventListener("mousemove", (event) => {
   if (!dot || !ring) return;
@@ -39,9 +44,9 @@ function onScroll() {
   if (prog) prog.style.transform = `scaleX(${p})`;
 
   if (!reduced && portrait && window.innerWidth > 860) {
-    portrait.style.transform = `translate(-50%, calc(-50% + ${window.scrollY * 0.06}px))`;
+    portrait.style.transform = `translate3d(-50%, ${window.scrollY * 0.08}px, 0)`;
   } else if (portrait) {
-    portrait.style.transform = "translate(-50%, -50%)";
+    portrait.style.transform = "none";
   }
 
   ghosts.forEach((ghost) => {
@@ -59,6 +64,16 @@ function onScroll() {
       step.classList.toggle("is-on", clamped > (index + 0.15) / steps.length);
     });
   }
+
+  flows.forEach(({ list, fill, items }) => {
+    const box = list.getBoundingClientRect();
+    const progress = (window.innerHeight * 0.72 - box.top) / (box.height * 0.85);
+    const clamped = Math.min(1, Math.max(0, progress));
+    if (fill) fill.style.transform = `scaleY(${clamped})`;
+    items.forEach((item, index) => {
+      item.classList.toggle("is-on", clamped > (index + 0.2) / items.length);
+    });
+  });
 }
 
 let ticking = false;
@@ -106,4 +121,8 @@ if (reduced) {
   revealEls.forEach((el) => el.classList.add("in"));
   counters.forEach(runCount);
   steps.forEach((step) => step.classList.add("is-on"));
+  flows.forEach(({ fill, items }) => {
+    if (fill) fill.style.transform = "scaleY(1)";
+    items.forEach((item) => item.classList.add("is-on"));
+  });
 }
